@@ -1,0 +1,19 @@
+# build outputs
+build/
+out/
+bin/
+obj/
+
+# IDE
+.vs/
+.vscode/
+
+# vulkan / shaders
+*.spv
+
+# OS
+.DS_Store
+Thums.db
+
+# libs
+/libs
