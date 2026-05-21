@@ -1,6 +1,6 @@
-#include <ktx.h>
 
-#include "resources.h"
+#include "texture.h"
+
 
 bool Texture::doLoad() 
 {
@@ -50,19 +50,6 @@ void Texture::CreateVulkanImage(unsigned char* data, int width, int height, int 
 }
 
 vk::Device Texture::GetDevice()
-{
-
-}
-
-bool Mesh::doLoad() 
-{
-    std::string filePath = "models/" + GetId() + ".gltf";
-
-    std::vector<Vertex>
-
-}
-
-bool Mesh::doUnload() 
 {
 
 }

@@ -58,6 +58,4 @@ public:
 
 private:
     uint32_t FindMemoryType(uint32_t typeFilter, vk::MemoryPropertyFlags properties);
-
-
 };
