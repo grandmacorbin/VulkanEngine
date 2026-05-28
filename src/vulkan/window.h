@@ -1,7 +1,7 @@
 #include <string>
 
 #include "glfw3.h"
-#include "vulkan_raii.hpp"
+#include "vulkan/vulkan_raii.hpp"
 
 class Window {
 private:

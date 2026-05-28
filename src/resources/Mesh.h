@@ -1,6 +1,6 @@
 #include <array>
 
-#include "vulkan_raii.hpp"
+#include "vulkan/vulkan_raii.hpp"
 #include "glm.hpp"
 #include "resourceManager.h"
 

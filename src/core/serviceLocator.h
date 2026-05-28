@@ -4,7 +4,7 @@
 #include <stdexcept>
 #include <string>
 
-#include "vulkan_raii.hpp"
+#include "vulkan/vulkan_raii.hpp"
 
 class ServiceLocator {
 private:

@@ -2,7 +2,7 @@
 #include <functional>
 #include <unordered_map>
 
-#include "vulkan_raii.hpp"
+#include "vulkan/vulkan_raii.hpp"
 
 class RenderGraph {
 private:
