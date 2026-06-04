@@ -9,7 +9,7 @@
 class VulkanDevice {
 private:
     vk::raii::Context context;
-
+#define NDEBUG
     #ifdef NDEBUG
     bool enableValidationLayers = false;
     #else
@@ -23,10 +23,10 @@ private:
     vk::raii::PhysicalDevice physicalDevice;
     vk::raii::Device device;
 
-    vk::Queue graphicsQueue;
+    vk::Queue graphicsComputeQueue;
     vk::Queue presentQueue;
 
-    uint32_t graphicsFamily;
+    uint32_t graphicsComputeFamily; // same family for both right now
     uint32_t presentFamily;
 
     vk::raii::CommandPool graphicsCommandPool = nullptr;
@@ -35,8 +35,14 @@ public:
     void initialize(Window& window);
     void shutdown();
 
-    vk::raii::PhysicalDevice& getPhysicalDevice();
-    vk::raii::Device& getDevice();
+    vk::raii::PhysicalDevice& getPhysicalDevice()
+    {
+        return physicalDevice;
+    }
+    vk::raii::Device& getDevice()
+    {
+        return device;
+    }
 
 
     struct BufferAllocation {

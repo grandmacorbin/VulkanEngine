@@ -12,6 +12,23 @@ std::vector<const char *>					requiredDeviceExtension = {
     vk::KHRSwapchainExtensionName,
 };
 
+void VulkanDevice::initialize(Window &window)
+{
+    createInstance();
+    setupDebugMessenger();
+    createSurface(window);
+    pickPhysicalDevice();
+    createLogicalDevice();
+    retrieveQueues();
+    createCommandPools();
+    createAllocator();
+}
+
+void VulkanDevice::shutdown()
+{
+    //TODO
+}
+
 VulkanDevice::BufferAllocation VulkanDevice::CreateBuffer(
         vk::DeviceSize size,
         vk::BufferUsageFlags usage,
@@ -156,17 +173,59 @@ void VulkanDevice::pickPhysicalDevice()
 
 void VulkanDevice::createLogicalDevice()
 {
+    std::vector<vk::QueueFamilyProperties> queueFamilyProperties = physicalDevice.getQueueFamilyProperties();
+
+    uint32_t queueIndex = ~0;
+    for(uint32_t qfpIndex = 0; qfpIndex < queueFamilyProperties.size(); qfpIndex++)
+    {
+        if((queueFamilyProperties[qfpIndex].queueFlags & vk::QueueFlagBits::eGraphics) && (queueFamilyProperties[qfpIndex].queueFlags & vk::QueueFlagBits::eCompute)
+            && physicalDevice.getSurfaceSupportKHR(qfpIndex, *surface))
+            {
+                queueIndex = qfpIndex;
+                break;
+            }
+    }
+    if(queueIndex == ~0)
+    {
+        throw std::runtime_error("Could not find a queue for graphics and compute and present -> terminating");
+    }
+    graphicsComputeFamily = queueIndex;
+    float queuePriority = 0.5f;
+    vk::DeviceQueueCreateInfo deviceQueueCreateInfo{};
+    deviceQueueCreateInfo.queueFamilyIndex = graphicsComputeFamily;
+    deviceQueueCreateInfo.queueCount = 1;
+    deviceQueueCreateInfo.pQueuePriorities = &queuePriority;
+
+    vk::PhysicalDeviceFeatures deviceFeatures;
+    vk::StructureChain<vk::PhysicalDeviceFeatures2, vk::PhysicalDeviceVulkan13Features, vk::PhysicalDeviceExtendedDynamicStateFeaturesEXT> featureChain = {
+        {},
+        {.dynamicRendering = true },
+        {.extendedDynamicState = true },
+    };
+
+    vk::DeviceCreateInfo deviceCreateInfo{};
+    deviceCreateInfo.pNext = &featureChain.get<vk::PhysicalDeviceFeatures2>();
+    deviceCreateInfo.queueCreateInfoCount = 1;
+    deviceCreateInfo.pQueueCreateInfos = &deviceQueueCreateInfo;
+    deviceCreateInfo.enabledExtensionCount = static_cast<uint32_t>(requiredDeviceExtension.size());
+    deviceCreateInfo.ppEnabledExtensionNames = requiredDeviceExtension.data();
+
+    device = vk::raii::Device( physicalDevice, deviceCreateInfo );
     
 }
 
 void VulkanDevice::retrieveQueues()
 {
-
+    graphicsComputeQueue = vk::raii::Queue( device, graphicsComputeFamily, 0);
 }
 
 void VulkanDevice::createCommandPools()
 {
+    vk::CommandPoolCreateInfo poolInfo{};
+    poolInfo.flags = vk::CommandPoolCreateFlagBits::eResetCommandBuffer;
+    poolInfo.queueFamilyIndex = graphicsComputeFamily;
 
+    graphicsCommandPool = vk::raii::CommandPool(device, poolInfo);
 }
 
 void VulkanDevice::createAllocator()
