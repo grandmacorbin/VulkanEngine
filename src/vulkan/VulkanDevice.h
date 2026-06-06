@@ -30,6 +30,7 @@ private:
     uint32_t presentFamily;
 
     vk::raii::CommandPool graphicsCommandPool = nullptr;
+    vk::raii::CommandPool computeCommandPool = nullptr;
 
 public:
     void initialize(Window& window);

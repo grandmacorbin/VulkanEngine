@@ -85,11 +85,26 @@ VulkanDevice::ImageAllocation VulkanDevice::CreateImage(
 vk::raii::CommandBuffer VulkanDevice::BeginSingleTimeCommands()
 {
     vk::CommandBufferAllocateInfo allocInfo;
+    allocInfo.commandPool = graphicsCommandPool;
+    allocInfo.level = vk::CommandBufferLevel::ePrimary;
+    allocInfo.commandBufferCount = 1;
+    vk::raii::CommandBuffer commandBuffer = std::move(device.allocateCommandBuffers(allocInfo).front());
+
+    commandBuffer.begin(vk::CommandBufferBeginInfo{ vk::CommandBufferUsageFlagBits::eOneTimeSubmit });
+
+    return commandBuffer;
 }
 
 void VulkanDevice::EndSingleTimeCommands(vk::raii::CommandBuffer& commandBuffer)
 {
+    commandBuffer.end();
 
+    vk::SubmitInfo submitInfo;
+    submitInfo.commandBufferCount = 1;
+    submitInfo.pCommandBuffers = &*commandBuffer;
+
+    graphicsComputeQueue.submit(submitInfo, nullptr);
+    graphicsComputeQueue.waitIdle();
 }
 
 void VulkanDevice::createInstance()
@@ -197,11 +212,11 @@ void VulkanDevice::createLogicalDevice()
     deviceQueueCreateInfo.pQueuePriorities = &queuePriority;
 
     vk::PhysicalDeviceFeatures deviceFeatures;
-    vk::StructureChain<vk::PhysicalDeviceFeatures2, vk::PhysicalDeviceVulkan13Features, vk::PhysicalDeviceExtendedDynamicStateFeaturesEXT> featureChain = {
-        {},
-        {.dynamicRendering = true },
-        {.extendedDynamicState = true },
-    };
+    vk::StructureChain<vk::PhysicalDeviceFeatures2, 
+        vk::PhysicalDeviceVulkan13Features, vk::PhysicalDeviceExtendedDynamicStateFeaturesEXT> 
+        featureChain{};
+    featureChain.get<vk::PhysicalDeviceVulkan13Features>().dynamicRendering = true;
+    featureChain.get<vk::PhysicalDeviceExtendedDynamicStateFeaturesEXT>().extendedDynamicState = true;
 
     vk::DeviceCreateInfo deviceCreateInfo{};
     deviceCreateInfo.pNext = &featureChain.get<vk::PhysicalDeviceFeatures2>();
@@ -221,11 +236,11 @@ void VulkanDevice::retrieveQueues()
 
 void VulkanDevice::createCommandPools()
 {
-    vk::CommandPoolCreateInfo poolInfo{};
-    poolInfo.flags = vk::CommandPoolCreateFlagBits::eResetCommandBuffer;
-    poolInfo.queueFamilyIndex = graphicsComputeFamily;
+    vk::CommandPoolCreateInfo graphicsPoolInfo{};
+    graphicsPoolInfo.flags = vk::CommandPoolCreateFlagBits::eResetCommandBuffer;
+    graphicsPoolInfo.queueFamilyIndex = graphicsComputeFamily;
 
-    graphicsCommandPool = vk::raii::CommandPool(device, poolInfo);
+    graphicsCommandPool = vk::raii::CommandPool(device, graphicsPoolInfo);
 }
 
 void VulkanDevice::createAllocator()
@@ -235,7 +250,16 @@ void VulkanDevice::createAllocator()
 
 uint32_t VulkanDevice::FindMemoryType(uint32_t typeFilter, vk::MemoryPropertyFlags properties)
 {
+    vk::PhysicalDeviceMemoryProperties memProperties = physicalDevice.getMemoryProperties();
 
+    for(uint32_t i = 0; i < memProperties.memoryTypeCount; i++)
+    {
+        if((typeFilter & (1 << i)) && (memProperties.memoryTypes[i].propertyFlags & properties) == properties)
+        {
+            return i;
+        }
+    }
+    throw std::runtime_error("failed to find suitable memory type!");
 }
 
 VKAPI_ATTR vk::Bool32 VKAPI_CALL VulkanDevice::debugCallback(vk::DebugUtilsMessageSeverityFlagBitsEXT severity, vk::DebugUtilsMessageTypeFlagsEXT type, const vk::DebugUtilsMessengerCallbackDataEXT* pCallbackData, void*)
