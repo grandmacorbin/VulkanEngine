@@ -48,8 +48,3 @@ void Texture::CreateVulkanImage(unsigned char* data, int width, int height, int 
 {
 
 }
-
-vk::Device Texture::GetDevice()
-{
-
-}

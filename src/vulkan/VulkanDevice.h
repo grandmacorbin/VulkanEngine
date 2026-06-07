@@ -32,6 +32,12 @@ private:
     vk::raii::CommandPool graphicsCommandPool = nullptr;
     vk::raii::CommandPool computeCommandPool = nullptr;
 
+    struct SwapchainSupportDetails {
+        vk::SurfaceCapabilitiesKHR capabilities;
+        std::vector<vk::SurfaceFormatKHR> formats;
+        std::vector<vk::PresentModeKHR> presentModes;
+    };
+
 public:
     void initialize(VulkanWindow& window);
     void shutdown();
@@ -77,6 +83,8 @@ public:
     vk::raii::CommandBuffer BeginSingleTimeCommands();
 
     void EndSingleTimeCommands(vk::raii::CommandBuffer& commandBuffer);
+
+    SwapchainSupportDetails querySwapchainSupport();
 
 private:
     void createInstance();

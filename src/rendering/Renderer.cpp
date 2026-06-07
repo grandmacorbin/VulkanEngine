@@ -10,14 +10,44 @@
 void Renderer::createSwapChain()
 {
     auto* vulkanDevice = ServiceLocator::GetVulkanDevice();
-    vk::SurfaceCapabilitiesKHR surfaceCapabilities = vulkanDevice->getPhysicalDevice().getSurfaceCapabilitiesKHR(vulkanDevice->getSurface());
-    swapchainExtent = chooseSwapExtent(surfaceCapabilities);
-    minImageCount = chooseMinImageCount(surfaceCapabilities);
+    auto support = vulkanDevice->querySwapchainSupport();
 
-    std::vector<vk::SurfaceFormatKHR> availableFormats = vulkanDevice->getPhysicalDevice().getSurfaceFormatsKHR(vulkanDevice->getSurface());
-    swapchainSurfaceFormat = chooseSwapSurfaceFormat(availableFormats);
+    swapchainExtent = chooseSwapExtent(support.capabilities);
+    swapchainSurfaceFormat = chooseSwapSurfaceFormat(support.formats);
+    minImageCount = chooseMinImageCount(support.capabilities);
 
-    // continue
+    vk::SwapchainCreateInfoKHR swapchainCreateInfo{};
+    swapchainCreateInfo.surface = vulkanDevice->getSurface();
+    swapchainCreateInfo.minImageCount = minImageCount;
+    swapchainCreateInfo.imageFormat = swapchainSurfaceFormat.format;
+    swapchainCreateInfo.imageColorSpace = swapchainSurfaceFormat.colorSpace;
+    swapchainCreateInfo.imageExtent = swapchainExtent;
+    swapchainCreateInfo.imageArrayLayers = 1;
+    swapchainCreateInfo.imageUsage = vk::ImageUsageFlagBits::eColorAttachment;
+    swapchainCreateInfo.imageSharingMode = vk::SharingMode::eExclusive;
+    swapchainCreateInfo.preTransform = support.capabilities.currentTransform;
+    swapchainCreateInfo.compositeAlpha = vk::CompositeAlphaFlagBitsKHR::eOpaque;
+    swapchainCreateInfo.presentMode = chooseSwapPresentMode(support.presentModes);
+    swapchainCreateInfo.clipped = true;
+
+    swapchain = vk::raii::SwapchainKHR(vulkanDevice->getDevice(), swapchainCreateInfo);
+    swapchainImages = swapchain.getImages();
+}
+
+void Renderer::createImageViews()
+{
+    assert(swapchainImageViews.empty());
+    vk::ImageViewCreateInfo imageViewCreateInfo{};
+    imageViewCreateInfo.viewType = vk::ImageViewType::e2D;
+    imageViewCreateInfo.format = swapchainSurfaceFormat.format;
+    imageViewCreateInfo.subresourceRange = { vk::ImageAspectFlagBits::eColor, 0, 1, 0, 1 }; // level and layer count = 1 
+
+    auto* vulkanDevice = ServiceLocator::GetVulkanDevice();
+    for(auto &image : swapchainImages)
+    {
+        imageViewCreateInfo.image = image;
+        swapchainImageViews.emplace_back(vulkanDevice->getDevice(), imageViewCreateInfo);
+    }
 }
 
 vk::SurfaceFormatKHR Renderer::chooseSwapSurfaceFormat(const std::vector<vk::SurfaceFormatKHR>& availableFormats)

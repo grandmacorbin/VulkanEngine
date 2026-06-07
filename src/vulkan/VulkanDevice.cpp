@@ -306,3 +306,14 @@ bool VulkanDevice::isDeviceSuitable(vk::raii::PhysicalDevice const& physicalDevi
 
     return supportGraphicsAndCompute && supportsVulkan1_3 && supportsAllRequiredExtensions && supportsRequiredFeatures;
 }
+
+VulkanDevice::SwapchainSupportDetails VulkanDevice::querySwapchainSupport()
+{
+    SwapchainSupportDetails details;
+
+    details.capabilities = physicalDevice.getSurfaceCapabilitiesKHR(surface);
+    details.formats = physicalDevice.getSurfaceFormatsKHR(surface);
+    details.presentModes = physicalDevice.getSurfacePresentModesKHR(surface);
+
+    return details;
+}

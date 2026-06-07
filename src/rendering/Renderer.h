@@ -18,10 +18,13 @@ public:
 
 private:
     void createSwapChain();
+    void createImageViews();
+
+    void createGraphicsPipeline();
 
     vk::SurfaceFormatKHR chooseSwapSurfaceFormat(const std::vector<vk::SurfaceFormatKHR>& availableFormats);
     vk::PresentModeKHR chooseSwapPresentMode(std::vector<vk::PresentModeKHR> const &availablePresentModes);
     vk::Extent2D chooseSwapExtent(vk::SurfaceCapabilitiesKHR const &capabilities);
     uint32_t chooseMinImageCount(vk::SurfaceCapabilitiesKHR const &surfaceCapabilities);
-    
+
 };
