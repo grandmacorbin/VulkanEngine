@@ -3,7 +3,7 @@
 #include "glfw3.h"
 #include "vulkan/vulkan_raii.hpp"
 
-class Window {
+class VulkanWindow {
 private:
     GLFWwindow* window = nullptr;
 

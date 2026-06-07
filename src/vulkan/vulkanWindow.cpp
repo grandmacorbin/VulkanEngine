@@ -1,6 +1,6 @@
-#include "window.h"
+#include "vulkanWindow.h"
 
-void Window::initialize(int width, int height, const std::string& title)
+void VulkanWindow::initialize(int width, int height, const std::string& title)
 {
     
 
@@ -22,7 +22,7 @@ void Window::initialize(int width, int height, const std::string& title)
     glfwSetFramebufferSizeCallback(window, frameBufferResizeCallback);
 }
 
-void Window::shutdown()
+void VulkanWindow::shutdown()
 {
     if(!window)
     {
@@ -34,17 +34,17 @@ void Window::shutdown()
     glfwTerminate();
 }
 
-void Window::pollEvents()
+void VulkanWindow::pollEvents()
 {
     glfwPollEvents();
 }
 
-bool Window::shouldClose() const
+bool VulkanWindow::shouldClose() const
 {
     return glfwWindowShouldClose(window);
 }
 
-GLFWwindow* Window::getHandle() const
+GLFWwindow* VulkanWindow::getHandle() const
 {
     if(!window)
     {
@@ -54,7 +54,7 @@ GLFWwindow* Window::getHandle() const
     return window;
 }
 
-vk::Extent2D Window::getExtent() const
+vk::Extent2D VulkanWindow::getExtent() const
 {
     int frameBufferWidth;
     int frameBufferHeight;
@@ -71,19 +71,19 @@ vk::Extent2D Window::getExtent() const
     };
 }
 
-bool Window::windowResized() const
+bool VulkanWindow::windowResized() const
 {
     return frameBufferResized;
 }
 
-void Window::resetWindowResizedFlag()
+void VulkanWindow::resetWindowResizedFlag()
 {
     frameBufferResized = false;
 }
 
-void Window::frameBufferResizeCallback(GLFWwindow* window, int width, int height)
+void VulkanWindow::frameBufferResizeCallback(GLFWwindow* window, int width, int height)
 {
-    auto appWindow = reinterpret_cast<Window*>(glfwGetWindowUserPointer(window));
+    auto appWindow = reinterpret_cast<VulkanWindow*>(glfwGetWindowUserPointer(window));
 
     appWindow->frameBufferResized = true;
 

@@ -12,7 +12,7 @@ std::vector<const char *>					requiredDeviceExtension = {
     vk::KHRSwapchainExtensionName,
 };
 
-void VulkanDevice::initialize(Window &window)
+void VulkanDevice::initialize(VulkanWindow &window)
 {
     createInstance();
     setupDebugMessenger();
@@ -162,7 +162,7 @@ void VulkanDevice::setupDebugMessenger()
     debugMessenger = instance.createDebugUtilsMessengerEXT(debugUtilsMessengerCreateInfoEXT);
 }
 
-void VulkanDevice::createSurface(Window& window)
+void VulkanDevice::createSurface(VulkanWindow& window)
 {
     VkSurfaceKHR _surface;
     if(glfwCreateWindowSurface(*instance, window.getHandle(), nullptr, &_surface) != VK_SUCCESS)

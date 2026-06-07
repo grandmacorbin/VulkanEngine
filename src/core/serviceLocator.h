@@ -54,7 +54,7 @@ public:
     }
 
     static class VulkanInstance* GetVulkanInstance();
-    static class VulkanPhysicalDevice* GetPhysicalDevice();
+    static class VulkanDevice* GetVulkanDevice();
     static class VulkanDevice* GetDevice();
     static class Renderer* GetRenderer();
     static class ResourceManager* GetResourceManager();

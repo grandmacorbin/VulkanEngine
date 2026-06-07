@@ -1,6 +1,6 @@
 #include <vector>
 
-#include "window.h"
+#include "vulkanWindow.h"
 #include "GLFW/glfw3.h"
 #include "vulkan/vulkan_raii.hpp"
 
@@ -33,7 +33,7 @@ private:
     vk::raii::CommandPool computeCommandPool = nullptr;
 
 public:
-    void initialize(Window& window);
+    void initialize(VulkanWindow& window);
     void shutdown();
 
     vk::raii::PhysicalDevice& getPhysicalDevice()
@@ -45,6 +45,10 @@ public:
         return device;
     }
 
+    vk::raii::SurfaceKHR& getSurface()
+    {
+        return surface;
+    }
 
     struct BufferAllocation {
         vk::raii::Buffer buffer;
@@ -79,7 +83,7 @@ private:
 
     void setupDebugMessenger();
 
-    void createSurface(Window& window);
+    void createSurface(VulkanWindow& window);
     
     void pickPhysicalDevice();
 

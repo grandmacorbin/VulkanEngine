@@ -27,8 +27,8 @@ VulkanInstance* ServiceLocator::GetVulkanInstance() {
     return Get<VulkanInstance>();
 }
 
-VulkanPhysicalDevice* ServiceLocator::GetPhysicalDevice() {
-    return Get<VulkanPhysicalDevice>();
+VulkanDevice* ServiceLocator::GetVulkanDevice() {
+    return Get<VulkanDevice>();
 }
 
 VulkanDevice* ServiceLocator::GetDevice() {
